@@ -41,6 +41,7 @@ const initialHook = {
     emailOnError: true,
   },
   schedule: [],
+  bindings: [],
   task: {
     provisionerId: 'aws-provisioner-v1',
     workerType: 'tutorial',
@@ -134,6 +135,7 @@ export default class HookForm extends Component {
       triggerSchema: hook.triggerSchema,
       triggerSchemaInput: hook.triggerSchema,
       schedule: hook.schedule,
+      bindings: hook.bindings,
     };
   }
 
@@ -175,6 +177,9 @@ export default class HookForm extends Component {
     triggerSchemaValidJson: true,
     scheduleTextField: '',
     schedule: null,
+    bindingsExchangeTextField: '',
+    bindingsRkpTextField: '#',
+    bindings: null,
     dialogOpen: false,
   };
 
@@ -185,6 +190,7 @@ export default class HookForm extends Component {
       owner,
       emailOnError,
       schedule,
+      bindings,
       task,
       triggerSchema,
     } = this.state;
@@ -196,6 +202,7 @@ export default class HookForm extends Component {
         emailOnError,
       },
       schedule,
+      bindings,
       task,
       triggerSchema,
     };
@@ -234,6 +241,35 @@ export default class HookForm extends Component {
         hookId,
         hookGroupId,
       });
+  };
+
+  handleDeleteBinding = ({ target: { exchange, rkp } }) => {
+    this.setState({
+      bindings: this.state.bindings.filter(
+        binding =>
+          binding.exchange !== exchange || binding.routingKeyPattern !== rkp
+      ),
+    });
+  };
+
+  handleAddBinding = () => {
+    const {
+      bindingsExchangeTextField,
+      bindingsRkpTextField,
+      bindings,
+    } = this.state;
+    const newBinding = {
+      exchange: bindingsExchangeTextField,
+      routingKeyPattern: bindingsRkpTextField,
+    };
+
+    if (bindingsExchangeTextField) {
+      this.setState({
+        bindingsExchangeTextField: '',
+        bindingsRkpTextField: '#',
+        bindings: bindings.concat(newBinding),
+      });
+    }
   };
 
   handleEmailOnErrorChange = () => {
@@ -341,6 +377,9 @@ export default class HookForm extends Component {
       emailOnError,
       scheduleTextField,
       schedule,
+      bindingsExchangeTextField,
+      bindingsRkpTextField,
+      bindings,
       taskInput,
       triggerSchemaInput,
       triggerContextInput,
@@ -526,6 +565,63 @@ export default class HookForm extends Component {
                   className={classes.iconButton}
                   name={cronJob}
                   onClick={this.handleDeleteCronJob}>
+                  <DeleteIcon />
+                </IconButton>
+              </ListItem>
+            ))}
+          </List>
+          <List subheader={<ListSubheader>Bindings</ListSubheader>}>
+            <ListItem>
+              <ListItemText
+                primary={
+                  <TextField
+                    required
+                    label="Pulse Exchange"
+                    name="bindingsExchangeTextField"
+                    placeholder="exchange/<username>/some-exchange-name"
+                    onChange={this.handleInputChange}
+                    fullWidth
+                    value={bindingsExchangeTextField}
+                  />
+                }
+              />
+              <ListItemText
+                primary={
+                  <TextField
+                    required
+                    label="Routing Key Pattern"
+                    placeholder="#.some-interesting-key.#"
+                    name="bindingsRkpTextField"
+                    onChange={this.handleInputChange}
+                    fullWidth
+                    value={bindingsRkpTextField}
+                  />
+                }
+              />
+              <IconButton
+                className={classes.iconButton}
+                onClick={this.handleAddBinding}>
+                <PlusIcon />
+              </IconButton>
+            </ListItem>
+            {bindings.map(binding => (
+              <ListItem
+                className={classes.bindingListItem}
+                key={`${binding.exchange}-${binding.routingKeyPattern}`}>
+                <ListItemText
+                  disableTypography
+                  primary={
+                    <Typography variant="body2">
+                      <code>{binding.exchange}</code> with{' '}
+                      <code>{binding.routingKeyPattern}</code>
+                    </Typography>
+                  }
+                />
+                <IconButton
+                  className={classes.iconButton}
+                  exchange={binding.exchange}
+                  rkp={binding.routingKeyPattern}
+                  onClick={this.handleDeleteBinding}>
                   <DeleteIcon />
                 </IconButton>
               </ListItem>

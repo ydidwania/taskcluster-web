@@ -3,6 +3,7 @@ query Hook($hookGroupId: ID!, $hookId: ID!) {
     hookGroupId
     hookId
     schedule
+    bindings
     metadata {
       name
       description

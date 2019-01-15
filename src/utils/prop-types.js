@@ -297,6 +297,12 @@ export const hook = shape({
   hookId: string,
   metadata: hookMetadata,
   schedule: arrayOf(string),
+  bindings: arrayOf(
+    shape({
+      exchange: string,
+      routingKeyPattern: string,
+    })
+  ),
   task: hookTask,
   expires: date,
   deadline: date,
